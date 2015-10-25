@@ -1,0 +1,315 @@
+//Computer Science Summative: Snakes & Ladders - Main Game
+//Created: June 12/2014
+//Stanley Huang & Josephine Mok
+//Runs the actual game.
+
+import hsa.Console;
+import java.awt.*;
+import java.io.*;
+import javax.imageio.*;
+public class SnakesAndLadders
+{
+  //Class-wide variables
+  static Console c;
+  static int round = 0;                     //round number
+  static int players = 0;                   //number of players
+  static Player[] users = new Player [2];   //Stores the actual player objects
+  static Image bg;                          //Stores the background image
+  static String computerChoice = null;      //Stores the what the computer picked
+  
+  public static void main(String[] args)
+  {
+    //Variable Decleration
+    c = new Console(32, 63);  //creates console with 32 rows and 63 collumns
+    char continueGame = 'N';  //user input whether or not they want to continue
+    Image main, main2;        //the image to draw
+    int dieRoll;              //stores the number the user rolled
+    
+    //Try to import the image from the file
+    try
+    {
+      main = ImageIO.read(new File("Graphics\\main.jpg"));
+      main2 = ImageIO.read(new File("Graphics\\main2.png"));
+      bg = ImageIO.read(new File("Graphics\\screen.png"));
+    }
+    catch(IOException e)      //File not found
+    {
+      main = null;
+      main2 = null;
+      bg = null;
+    }//try catch statement
+    try
+    {
+      c.drawImage(main,0,0,null);
+      Thread.sleep(3000);
+    }
+    catch(Exception e)
+    {
+    }//try catch statement
+    
+    //Draw the image (Image, x location, y location, null)
+    c.clear();
+    c.drawImage(main2,0,0,null);
+    c.setCursor(22,24);
+    c.println("Enter \"Y\" to start.");
+    continueGame = c.getChar();
+    if (continueGame == 'Y' ^ continueGame == 'y')  //if the user wants to continue
+    {
+      c.print("\n\n -> Enter the amount of players (1-6): ");
+      players = c.readInt();
+      if (players == 1) //1 player vs. computer
+      {
+        users [0] = new Player(c, 0);      //player
+        users [1] = new Player(c);         //computer
+        players = 2;    //two players in total
+      }
+      else              //multiplayer without computer 
+      {
+        users = new Player[players];
+        for (int i = 0; i<players; i++)
+        {
+          users[i] = new Player(c, i);
+        }
+      }//if statement
+      
+      c.clear();
+      //creates a board
+      c.drawImage(bg,0,0,null);
+      Board a = new Board(c);
+      for (int i = 0; i < players; i++)  //draws the initial pawns
+        users[i].drawMarker(c, users[i].getX(), users[i].getY());
+      round++;          //the user(s) have started a round
+      
+      for (int b = 0; b < players; b++)
+      {
+        if (users[b].getPosition() != 100) //while no one is on tile 100
+        {
+          c.setCursor(28,2);
+          //c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+          //continueGame = c.getChar();
+          if (continueGame == 'Y' ^ continueGame == 'y')
+          {
+            do
+            {
+              for (int j = 0; j < players; j++)  //to go through every players' turn
+              {
+                dieRoll = die();
+                users[j].move(c, dieRoll);  //moves the pawn to the next location
+                redraw();
+                c.setCursor(28,2);
+                c.println(" " + users[j].getName() + " rolled a " + dieRoll);
+                c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+                continueGame = c.getChar();
+              
+                if (users[j].getPosition() == 18)      //lands on green snake
+                {
+                  //STORE NEW POSITION OF 6
+                  users[j].move(c,-12);
+                  c.println(" " + users[j].getName() + " landed on a snake");
+                  c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+                  continueGame = c.getChar();
+                }
+                else if (users[j].getPosition() == 73)  //lands on black snake
+                {
+                  //STORE NEW POSITION OF 37
+                  users[j].move(c,-36);
+                  c.println(" " + users[j].getName() + " landed on a snake");
+                  c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+                  continueGame = c.getChar();
+                }
+                else if (users[j].getPosition() == 98) //lands on blue snake
+                {
+                  //STORE NEW POSITION OF 90
+                  users[j].move(c,-8);
+                  c.println(" " + users[j].getName() + " landed on a snake");
+                  c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+                  continueGame = c.getChar();
+                }
+                else if (users[j].getPosition() == 9)  //lands on a ladder
+                {
+                  //STORE NEW POSITION OF 31
+                  users[j].move(c,22);
+                  c.println(" " + users[j].getName() + " went up a ladder!");
+                  c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+                  continueGame = c.getChar();
+                }
+                else if (users[j].getPosition() == 27) //lands on a ladder
+                {
+                  //STORES NEW POSITION OF 53
+                  users[j].move(c,26);
+                  c.println(" " + users[j].getName() + " went up a ladder!");
+                  c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+                  continueGame = c.getChar();
+                }
+                else if (users[j].getPosition() == 43) //lands on a ladder
+                {
+                  //STORES NEW POSITION OF 80
+                  users[j].move(c,37);
+                  c.println(" " + users[j].getName() + " went up a ladder!");
+                  c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+                  continueGame = c.getChar();
+                }
+                else if (users[j].getPosition() == 13) //lands on the the "Die" tile
+                {
+                  //STORES NEW POSITION OF 1
+                  users[j].move(c,-12);
+                  c.println(" " + users[j].getName() + " landed on unlucky block 13 and died");
+                  c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+                  continueGame = c.getChar();
+                }//if statement
+                else if (users[j].getPosition() == 100)  //lands on the final tile
+                {
+                  continueGame = 'N';
+                  c.println("Congratulations! " + users[j].getName() + " has won!");
+                  break;
+                }
+                for (int i = 0; i < players; i++)  //to check if more than 1 player is on the same tile, and if they are, will determine who gets to stay
+                {
+                  if (!(i==j))
+                  {
+                    if (users[j].getPosition() == users[i].getPosition())
+                    {
+                      if (!(users[j].getPosition()==1))  //Does not run if they are at 1
+                      {
+                        int move;   //store the amount the block needs to move
+                        move = ((((int)(users[j].getPosition()/10.0))*10)-users[j].getPosition())+1;
+                        if (move == 0)
+                          move = -10;
+                        if (rockPaperScissors(users[j], users[i]))
+                        {
+                          users[i].move(c, move);
+                          if (!(computerChoice == null))    //prints what the computer chose for RPS
+                            c.println(" The computer chose " + computerChoice);
+                          c.println(" " + users[i].getName() + " lost and will be moved to the beginning of the row");
+                        }
+                        else
+                        {
+                          users[j].move(c, move);
+                          if (!(computerChoice == null))    //prints what the computer chose for RPS
+                            c.println(" The computer chose " + computerChoice);
+                          c.println(" " + users[j].getName() + " lost and will be moved to the beginning of the row");
+                        }//else statement
+                      }//if statement
+                      c.println(" Enter \"Y\" to continue and \"N\" to stop.");
+                      continueGame = c.getChar();
+                    }//if statement
+                  }//if statement
+                }//for statment
+              }//for statement
+              
+            }while (continueGame == 'Y' ^ continueGame == 'y');
+          }//if statement
+        }//if statement
+      }//for loop
+    }//if statement
+    c.close();
+  }//main method
+  
+  //Mini game that allows user to play rock, paper, scissors against another player that is on the same tile, returns true if the first player wins
+  public static boolean rockPaperScissors(Player x, Player y)
+  {
+    char xRPS = 'A';        //first player's option
+    char yRPS = 'A';        //second player's option
+    int random = 0;         //random number to determine computers choice
+    random = (int)(Math.random()*3+1);
+
+    boolean result = false; //default setting for result, only changes if first player (x) wins
+    c.setCursor(28,2);
+    do   //while both users have the same option chosen
+    {
+      if (x.isComputer())   //if one of the users on the same tile is a computer
+      {
+        switch (random)       //assigns plays for random numbers
+        {
+          case 1:
+            xRPS = 'R';
+            computerChoice = "Rock";
+            break;
+          case 2:
+            xRPS = 'P';
+            computerChoice = "Paper";
+            break;
+          case 3:
+            xRPS = 'S';
+            computerChoice = "Scissors";
+            break;
+        }//switch case statement
+        
+        c.println(" " + y.getName() + " input your choice\n(R for rock, P for paper and S for scissors): ");
+        yRPS = c.getChar();
+      }
+      else if (y.isComputer())
+      {
+        switch (random)
+        {
+          case 1:
+            yRPS = 'R';
+            computerChoice = "Rock";
+            break;
+          case 2:
+            yRPS = 'P';
+            computerChoice = "Paper";
+            break;
+          case 3:
+            yRPS = 'S';
+            computerChoice = "Scissors";
+            break;
+        }//switch case statement
+        c.println(" " + x.getName() + " , input your choice\n (R for rock, P for paper and S for scissors): ");
+        xRPS = c.getChar();
+      }
+      else   //if both users are actual players
+      {
+        c.println(" " + x.getName() + ",   input your choice\n (R for rock, P for paper and S for scissors): ");
+        xRPS = c.getChar();
+        c.println(" " + y.getName() + ",   input your choice\n (R for rock, P for paper and S for scissors): ");
+        yRPS = c.getChar();
+      }//if statement
+      if ((xRPS == 'R' && yRPS == 'S') ^ (xRPS == 'P' && yRPS == 'R') ^ (xRPS == 'S' && yRPS == 'P'))  //conditions where xRPS wins
+      {
+        result = true;
+      }//if statement
+      if (xRPS == yRPS)    //if they tied
+        c.println(" -> Tie, try again!");
+    }while (xRPS == yRPS);
+    return result;
+  }//rockPaperScissors method
+  
+  /*
+  //Outputs the stats of the games
+  public static void stats(int players)
+  {
+    String[] standings = new String[players];  //used to store the standings from closest to 100 to farthest
+    standings[0] = users[0].getName();       //assigns the initial value for comparison
+    
+    for (int a = 0; a < players; a++)  //continue looping until all player stats are displayed
+    {
+      if (users[a].getPosition() > users[a+1].getPosition())  //if the current user is closer to 100 than the one that is being compared
+      {
+        standings[a+1] = users[a+1].getName();
+      }
+    }//for loop
+    c.println("Round #" + round);
+  }//stats method
+  */
+  //Generates a random number between 1 - 6 to simulate rolling a die
+  public static int die()
+  {
+    int randomDie = 0;  //random number for die roll
+    randomDie = (int)(Math.random()*6+1);
+    return randomDie;
+  }//die method
+  
+  //Reprints everyting after every turn
+  public static void redraw()
+  {
+    c.clear();
+    c.drawImage(bg,0,0,null);
+    Board a = new Board(c);
+    for(int z = 0; z < users.length; z++)  //reprints all of the 
+    {
+      users[z].drawMarker(c, users[z].getX(), users[z].getY());
+    }//for loop
+    
+  }//redraw method
+}
